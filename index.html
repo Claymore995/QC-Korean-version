@@ -1,0 +1,2503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QC Team - Transcript Analyzer (ENG ver.)</title>
+    <style>
+        :root {
+            --dark: #222831;
+            --dark-gray: #393E46;
+            --primary: #00ADB5;
+            --light: #EEEEEE;
+            --danger: #FF2E63;
+            --success: #00ADB5;
+            --warning: #FFC93C;
+        }
+        
+        body {
+            background-image: url('https://images.pexels.com/photos/3182773/pexels-photo-3182773.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #222831 0%, #393E46 100%);
+            padding: 1.5rem 0;
+            border-bottom: 1px solid rgba(238, 238, 238, 0.1);
+            margin: -25px -25px 2rem -25px;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        h1 {
+            color: #EEEEEE;
+            text-align: center;
+            margin-bottom: 0;
+            font-weight: 600;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            position: relative;
+            display: inline-block;
+            padding: 0 30px;
+        }
+        
+        h1:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: #00ADB5;
+            border-radius: 3px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            padding: 25px;
+            margin-bottom: 30px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            resize: vertical;
+            transition: all 0.3s;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            background-color: white;
+            color: var(--dark);
+        }
+        
+        textarea:focus {
+            border-color: #00ADB5;
+            box-shadow: 0 0 0 3px rgba(0, 173, 181, 0.2), 
+                        inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            outline: none;
+        }
+        
+        .btn {
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .expand-transcript-container .btn {
+    background-color: var(--dark-gray) !important;
+    margin: 0 auto;
+}
+
+.expand-transcript-container .btn:hover {
+    background-color: var(--primary) !important;
+    transform: translateY(-2px);
+}
+        .btn:hover {
+            background-color: #008a91;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+        
+        .btn:hover:after {
+            animation: ripple 1s ease-out;
+        }
+        
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(25, 25);
+                opacity: 0;
+            }
+        }
+        
+        .btn i {
+            margin-right: 8px;
+            transition: transform 0.3s;
+        }
+        
+        .btn.analyzing i {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .file-upload {
+            display: none;
+        }
+        
+        .file-upload-label {
+            background-color: var(--dark-gray);
+            color: var(--light);
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 2px dashed #393E46;
+            text-align: center;
+        }
+        
+        .file-upload-label:hover {
+            background-color: #2d3238;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            border-color: #00ADB5;
+            background: rgba(0, 173, 181, 0.05);
+        }
+        
+        .file-upload-label.drag-over {
+            border-color: #00ADB5;
+            background: rgba(0, 173, 181, 0.1);
+            transform: translateY(-3px);
+        }
+        
+        .results-container {
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .summary-card {
+            background: var(--dark);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            color: var(--light);
+        }
+        
+        .stat-box {
+            text-align: center;
+            padding: 15px;
+            flex: 1;
+            min-width: 120px;
+            position: relative;
+        }
+        
+        .stat-box:not(:last-child):after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 40px;
+            width: 1px;
+            background: rgba(238, 238, 238, 0.2);
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--primary);
+            position: relative;
+            display: inline-block;
+        }
+        
+        .stat-value:after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 2px;
+            background: #00ADB5;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: rgba(238, 238, 238, 0.8);
+        }
+        
+        .risk-list {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+        
+        .risk-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            --i: 0;
+            transition-delay: calc(var(--i) * 0.05s);
+        }
+        
+        .risk-item:not(:last-child):after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 60px;
+            right: 20px;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(57, 62, 70, 0.2), rgba(57, 62, 70, 0.05));
+        }
+        
+        .risk-item:hover {
+            background-color: rgba(0, 173, 181, 0.05);
+        }
+        
+        .risk-item.checked {
+            background-color: rgba(0, 173, 181, 0.1);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .risk-item.checked:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        .risk-icon {
+            margin-right: 15px;
+            font-size: 20px;
+            min-width: 24px;
+            position: relative;
+            width: 24px;
+            height: 24px;
+        }
+        
+        .risk-icon i {
+            position: absolute;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        
+        .risk-icon .checked-icon {
+            opacity: 0;
+            transform: scale(0) rotate(-90deg);
+            color: var(--primary);
+        }
+        
+        .risk-item.checked .risk-icon .material-icons:first-child {
+            opacity: 0;
+            transform: scale(0) rotate(90deg);
+        }
+        
+        .risk-item.checked .risk-icon .checked-icon {
+            opacity: 1;
+            transform: scale(1) rotate(0);
+            animation: checkBounce 0.6s ease;
+        }
+        
+        @keyframes checkBounce {
+            0%, 100% { transform: scale(1); }
+            30% { transform: scale(1.3); }
+            50% { transform: scale(0.9); }
+            70% { transform: scale(1.1); }
+        }
+        
+        .risk-item:hover .risk-icon i {
+            transform: scale(1.2);
+        }
+        
+        .risk-item.checked:after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(0, 173, 181, 0.3);
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            opacity: 0;
+        }
+        
+        .risk-item.checked:after {
+            animation: ripple 0.6s ease-out;
+        }
+        
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(20, 20);
+                opacity: 0;
+            }
+        }
+        
+        .risk-content {
+            flex: 1;
+        }
+        
+        .risk-phrase {
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: var(--danger);
+            transition: color 0.2s;
+        }
+        
+        .risk-item.checked .risk-phrase {
+            color: var(--primary);
+        }
+        
+        .risk-context {
+            font-size: 14px;
+            color: var(--dark-gray);
+            display: flex;
+            align-items: center;
+        }
+        
+        .risk-time {
+            background: rgba(0, 173, 181, 0.1);
+            color: var(--primary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: monospace;
+            margin-left: 8px;
+        }
+        
+        .risk-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            width: 0;
+            background: var(--primary);
+            transition: width 0.5s ease;
+        }
+        
+        .risk-item.checked .risk-progress {
+            width: 100%;
+        }
+        
+        .no-risks {
+            padding: 30px;
+            text-align: center;
+            color: var(--primary);
+            font-size: 18px;
+        }
+        
+        .no-risks i {
+            font-size: 40px;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .highlight {
+            background-color: rgba(255, 206, 86, 0.3);
+            padding: 2px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 2px;
+        }
+        
+        .highlight:hover {
+            background-color: rgba(255, 206, 86, 0.5);
+        }
+        
+        .highlight.active {
+            background-color: rgba(255, 206, 86, 0.7);
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { background-color: rgba(255, 206, 86, 0.7); }
+            50% { background-color: rgba(255, 206, 86, 0.4); }
+            100% { background-color: rgba(255, 206, 86, 0.7); }
+        }
+        
+        .copy-btn {
+            background: var(--dark-gray);
+            color: var(--light);
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .copy-btn:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .file-list {
+            margin-top: 15px;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: 4px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.2s;
+        }
+
+        .file-item:hover {
+            background-color: rgba(0, 173, 181, 0.05);
+            border-color: rgba(0, 173, 181, 0.2);
+        }
+
+        .file-item.active {
+            background-color: rgba(0, 173, 181, 0.1);
+            border-left: 3px solid var(--primary);
+        }
+
+        .file-name {
+            flex: 1;
+            margin-left: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 14px;
+        }
+        
+        .file-remove {
+            color: var(--dark-gray);
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.2s;
+        }
+        
+        .file-remove:hover {
+            color: var(--danger);
+            transform: rotate(90deg);
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+            opacity: 0;
+            z-index: 100;
+        }
+        
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(500px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .completion-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 4px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            animation: slideDown 0.5s forwards, fadeOut 0.5s 2.5s forwards;
+            display: none;
+        }
+        
+        @keyframes slideDown {
+            from { top: -50px; opacity: 0; }
+            to { top: 20px; opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+ #themeToggleContainer {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 999;
+}
+
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    background: var(--light);
+    padding: 6px 12px;
+    border-radius: 25px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: background 0.3s;
+}
+
+.theme-toggle input[type="checkbox"] {
+    appearance: none;
+    width: 40px;
+    height: 20px;
+    background: #ccc;
+    border-radius: 20px;
+    position: relative;
+    outline: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.theme-toggle input[type="checkbox"]::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: white;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle input[type="checkbox"]:checked {
+    background: var(--primary);
+}
+
+.theme-toggle input[type="checkbox"]:checked::before {
+    transform: translateX(20px);
+}
+
+.theme-toggle .label-text {
+    font-size: 20px;
+    margin-left: 10px;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+}
+/* 🌙 Dark mode - Comfortable appearance for transcript */
+.dark-transcript #highlightContainer,
+.dark-transcript #transcriptInput {
+    
+    background-color: #1e1e2e !important;  /* deep, soft navy blue */
+    color: #e0e0e0 !important;             /* soft light gray */
+    border-color: #444 !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Risk highlights in dark mode */
+.dark-transcript .highlight {
+    background-color: #ff6f61;    /* bright coral red */
+    color: #fff;
+    font-weight: bold;
+    padding: 1px 3px;
+    border-radius: 3px;
+}
+
+/* Hover and active states */
+.dark-transcript .highlight:hover,
+.dark-transcript .highlight.active {
+    background-color: #ff3b30;   /* brighter red on hover */
+    color: #ffffff;
+    text-shadow: 0 0 2px #fff;
+}
+
+        @media (max-width: 768px) {
+            .stat-box {
+                min-width: 50%;
+            }
+            
+            .stat-box:not(:last-child):after {
+                display: none;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .btn, .file-upload-label {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+              
+        .risk-category {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-right: 8px;
+    font-weight: 500;
+    color: Black !important;
+}
+
+/* --- Professionalism & Company Rules --- */
+.risk-category[data-category="Misleading Regarding to company's rules"] { background-color: #5DADE2; }
+.risk-category[data-category="Rude Behavior"] { background-color: #AF7AC5; }
+.risk-category[data-category="Unbalanced Statement"] { background-color: #FF714B; }
+.risk-category[data-category="Ignores Clients Requests"] { background-color: #E74C3C; }
+.risk-category[data-category="Couldn't Properly Answer the Client's Question"] { background-color: #D5DBDB; color: #333 !important; }
+.risk-category[data-category="Disobey the Company's Rules"] { background-color: #F39C12; }
+.risk-category[data-category="Professionalism"] { background-color: #AEB6BF; color: #333 !important; }
+
+/* --- Client Satisfaction --- */
+.risk-category[data-category="AM Hides Certain Service or Doesn't Explain"] { background-color: #7FB3D5; }
+.risk-category[data-category="Failing to Honor Agreements"] { background-color: #C0392B; }
+.risk-category[data-category="Client is not satisfied with the way he was treated by the Company"] { background-color: #CD6155; }
+
+/* --- Market Knowledge --- */
+.risk-category[data-category="Missing Knowledge of the Market"] { background-color: #154360; }
+.risk-category[data-category="False Market Information"] { background-color: #27AE60; }
+.risk-category[data-category="No Reference to Source"] { background-color: #2C3E50; }
+.risk-category[data-category="Agent hides or doesn't explain/provide the client all Trading Instruments"] { background-color: #935116; }
+.risk-category[data-category="Lack of Basic Trading Knowledge"] { background-color: #2980B9; }
+.risk-category[data-category="Failing to Explain Margin/Margin call"] { background-color: #34495E; }
+
+/* --- Trading --- */
+.risk-category[data-category="Managing Client's Account"] { background-color: #1ABC9C; }
+.risk-category[data-category="Unauthorized Transaction"] { background-color: #27AE60; }
+.risk-category[data-category="Promised/Guaranteed Profit"] { background-color: #BB8FCE; }
+.risk-category[data-category="Trading / Investment Advice"] { background-color: #884EA0; }
+
+/* --- Compliance --- */
+.risk-category[data-category="Uses Communication Methods not Pre-Approved by the Company"] { background-color: #76D7C4; color: #333 !important; }
+.risk-category[data-category="Neglection of Withdrawal"] { background-color: #D35400; }
+
+/* --- Reliability --- */
+.risk-category[data-category="False Information about the Automatic Trading/System/Robot"] { background-color: #52BE80; }
+.risk-category[data-category="Misleading the client to a Higher Leverage/Margin"] { background-color: #F4D03F; color: #333 !important; }
+.risk-category[data-category="Inappropriate Placing AM'S interest above the company / client interest"] { background-color: #DC7633; }
+/* --- Ignore --- */
+.risk-category[data-category="You can ignore this, but do so with caution!!"] { background-color: #F9FF1A; }
+        #languageSwitcher {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 8px 10px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 999;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(6px);
+}
+
+.lang-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 4px 6px;
+    border-radius: 20px;
+}
+
+.lang-option img {
+    width: 20px;
+    height: auto;
+    margin-right: 6px;
+    border-radius: 3px;
+}
+
+.lang-option span {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+}
+
+.lang-option:hover {
+    background-color: var(--primary);
+}
+
+.lang-option:hover span {
+    color: #fff;
+}
+
+.lang-option:hover img {
+    filter: brightness(1.1);
+}
+ .user-input-container {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        z-index: 999;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(0, 173, 181, 0.2);
+        width: 280px;
+        backdrop-filter: blur(5px);
+        transform: translateY(0);
+        transition: all 0.3s ease;
+    }
+
+    .user-input-container:hover {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .input-group {
+        position: relative;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-group .material-icons {
+        position: absolute;
+        left: 10px;
+        color: var(--dark-gray);
+        font-size: 20px;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 10px 10px 10px 35px;
+        border: 1px solid rgba(57, 62, 70, 0.2);
+        border-radius: 6px;
+        font-size: 14px;
+        background-color: white;
+        color: var(--dark);
+        transition: all 0.3s;
+    }
+
+    .form-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(0, 173, 181, 0.2);
+        outline: none;
+    }
+
+    .submit-btn {
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 6px;
+        cursor: pointer;
+        width: 100%;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s;
+    }
+
+    .submit-btn:hover {
+        background-color: #008a91;
+        transform: translateY(-1px);
+    }
+
+    .submit-btn:active {
+        transform: translateY(0);
+    }
+
+    .submit-message {
+        margin-top: 12px;
+        font-size: 13px;
+        text-align: center;
+        padding: 8px;
+        border-radius: 4px;
+        display: none;
+    }
+
+    /* Dark mode support */
+    .dark-transcript .user-input-container {
+        background: rgba(30, 30, 46, 0.95);
+        border-color: rgba(0, 173, 181, 0.3);
+    }
+
+    .dark-transcript .form-input {
+        background-color: #2a2a3a;
+        color: #e0e0e0;
+        border-color: #444;
+    }
+
+    .dark-transcript .input-group .material-icons {
+        color: rgba(224, 224, 224, 0.7);
+    }
+
+    /* Collapse/expand toggle */
+    .toggle-input-container {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: none;
+        border: none;
+        color: var(--dark-gray);
+        cursor: pointer;
+        padding: 5px;
+    }
+
+    .dark-transcript .toggle-input-container {
+        color: rgba(224, 224, 224, 0.7);
+    }
+
+    @media (max-width: 768px) {
+        .user-input-container {
+            position: static;
+            width: 100%;
+            margin-bottom: 20px;
+            box-shadow: none;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+    }
+ /* Enhanced Professional Popup Styling */
+#missingSAMPopup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  width: 90%;
+  max-width: 560px;
+  border-radius: 12px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+  z-index: 2000;
+  display: none;
+  overflow: hidden;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  animation: popIn 0.3s ease-out;
+}
+
+@keyframes popIn {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.professional-popup .popup-header {
+  background: linear-gradient(135deg, #222831 0%, #393E46 100%);
+  color: white;
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.professional-popup .header-icon {
+  margin-right: 12px;
+  background: rgba(255, 152, 0, 0.2);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.professional-popup .header-icon i {
+  color: #FF9800;
+  font-size: 20px;
+}
+
+.professional-popup .popup-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.professional-popup .close-btn {
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.8);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.professional-popup .close-btn:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.professional-popup .popup-content {
+  padding: 24px;
+}
+
+.professional-popup .main-message {
+  margin-bottom: 20px;
+}
+
+.professional-popup .main-message p {
+  margin: 0;
+  line-height: 1.6;
+  color: #333;
+  font-size: 15px;
+}
+
+.professional-popup .risk-section {
+  margin-bottom: 24px;
+}
+
+.professional-popup .section-label {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.professional-popup .risk-category-highlight {
+  background-color: #f8f9fa;
+  padding: 14px;
+  border-radius: 8px;
+  border-left: 4px solid #00ADB5;
+  display: inline-block;
+}
+
+.professional-popup .risk-category {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.professional-popup .notice-section {
+  background-color: #fff8e6;
+  border: 1px solid #ffecb3;
+  border-radius: 8px;
+  padding: 16px;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.professional-popup .notice-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  color: #7d6608;
+  font-weight: 600;
+}
+
+.professional-popup .notice-header i {
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+.professional-popup .notice-content {
+  color: #946c00;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.professional-popup .popup-footer {
+  background-color: #f5f7f9;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid #eaecef;
+}
+
+.professional-popup .acknowledge-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+  font-size: 14px;
+  border: none;
+  gap: 6px;
+  background-color: #00ADB5;
+  color: white;
+}
+
+.professional-popup .acknowledge-btn:hover {
+  background-color: #008a91;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 173, 181, 0.3);
+}
+
+/* Dark mode support */
+.dark-transcript #missingSAMPopup {
+  background: #2a2a3a;
+  color: #e0e0e0;
+}
+
+.dark-transcript .professional-popup .main-message p {
+  color: #e0e0e0;
+}
+
+.dark-transcript .professional-popup .risk-category-highlight {
+  background-color: #343446;
+}
+
+.dark-transcript .professional-popup .section-label {
+  color: #aaa;
+}
+
+.dark-transcript .professional-popup .notice-section {
+  background-color: #3a2e0a;
+  border-color: #5a4a15;
+}
+
+.dark-transcript .professional-popup .notice-header {
+  color: #e9c644;
+}
+
+.dark-transcript .professional-popup .notice-content {
+  color: #d6ba6e;
+}
+
+.dark-transcript .professional-popup .popup-footer {
+  background-color: #232330;
+  border-color: #343446;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .professional-popup .popup-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .professional-popup .popup-header h3 {
+    font-size: 16px;
+  }
+  
+  .professional-popup .popup-content {
+    padding: 18px;
+  }
+}
+
+  
+
+    
+    </style>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+<!-- toggle-->
+<div id="themeToggleContainer">
+  <label class="theme-toggle">
+    <input type="checkbox" id="themeToggle">
+    <span class="slider"></span>
+    <span class="label-text">
+      <i class="material-icons" id="themeIcon">dark_mode</i>
+    </span>
+  </label>
+</div>
+    <div id="languageSwitcher">
+  <div class="lang-option" onclick="switchLanguage('en')">
+    <img src="https://flagcdn.com/w40/gb.png" alt="English">
+    <span>EN</span>
+  </div>
+  <div class="lang-option" onclick="switchLanguage('jp')">
+    <img src="https://flagcdn.com/w40/jp.png" alt="Japanese">
+    <span>JP</span>
+  </div>
+  <div class="lang-option" onclick="switchLanguage('kr')">
+    <img src="https://flagcdn.com/w40/kr.png" alt="Korean">
+    <span>KR</span>
+  </div>
+</div>
+<div id="userInputContainer" class="user-input-container">
+    <div class="input-group">
+        <i class="material-icons">person</i>
+        <input type="text" id="usernameInput" placeholder="Your name" class="form-input">
+    </div>
+    <div class="input-group">
+        <i class="material-icons">add_circle</i>
+        <input type="text" id="newKeywordInput" placeholder="Suggest new keyword" class="form-input">
+    </div>
+    <button onclick="submitKeyword()" class="submit-btn">
+        <i class="material-icons">send</i> Submit Keyword
+    </button>
+    <div id="submitMessage" class="submit-message"></div>
+</div>
+
+
+    <div class="container">
+        <div class="header">
+            <h1>QC Team - Transcript Analyzer (KR ver.) <img src="https://flagcdn.com/w40/kr.png" alt="Korean"></h1>
+        </div>
+        
+        <div>
+            <textarea id="transcriptInput" placeholder="Paste your conversation transcript here...&#10;Example format:&#10;&#10;[09:30:00 - 09:31:00] Hello, trust me this is risk free!&#10;[09:31:00 - 09:32:00] We can meet in London."></textarea>
+            
+            <div class="controls">
+                <div>
+                    <input type="file" id="fileUpload" accept=".txt,.csv" class="file-upload" multiple>
+                    <label for="fileUpload" class="file-upload-label" id="fileUploadLabel">
+                        <i class="material-icons">upload</i> Upload Transcript(s)
+                    </label>
+                </div>
+                <button class="btn" onclick="analyzeTranscript()">
+                    <i class="material-icons">search</i> Analyze Transcript
+                </button>
+            </div>
+            
+            <div id="fileList" class="file-list" style="display: none;">
+                <h3 style="margin-top: 0; margin-bottom: 10px;">Uploaded Files</h3>
+                <div id="fileItems"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="resultsContainer" class="results-container" style="display: none;">
+        <div class="container">
+            <div class="summary-card">
+                <div class="stat-box">
+                    <div class="stat-value" id="totalRisks">0</div>
+                    <div class="stat-label">Total Risks Found</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="uniqueRisks">0</div>
+                    <div class="stat-label">Unique Risk Types</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="firstRiskTime">--:--:--</div>
+                    <div class="stat-label">First Risk At</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="lastRiskTime">--:--:--</div>
+                    <div class="stat-label">Last Risk At</div>
+                </div>
+            </div>
+            
+            <div class="risk-list" id="riskList">
+                <!-- Risks will be inserted here -->
+            </div>
+            
+            <div style="margin-top: 20px; text-align: right;">
+                <button class="copy-btn" onclick="copyResults()">
+                    <i class="material-icons">content_copy</i> Copy Results
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="completion-message" id="completionMessage">
+        <i class="material-icons" style="vertical-align: middle;">celebration</i>
+        All risks reviewed! Great job!
+    </div>
+
+    <audio id="checkSound" src="https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3"></audio>
+
+    <div id="results" style="display:none; margin-top: 20px; padding: 15px; background: white; border-radius: 8px;"></div>
+
+    <script>
+        // Enhanced risk phrases list with categories
+        const categories = {
+  "Misleading Regarding to company's rules": {
+   keywords: [
+  // Location/affiliation/authority claims
+  "사무실","미국","민국에서 우리 회사 사무실이 있었어요","두바이에 사무실","터키","유럽에서","그리스",
+  
+  // Offices / contracts / cooperation
+  "계약","한국 은행들","한국 은행들이랑",
+  
+  // Payment / internal depts / misc company statements
+  "커미션","125달러를 사용하고","125달러 선물로 들릴 겁니다","회사 이익이예요",
+  
+  // Other statements
+  "마음에 드시면","마음에 안 드시면","선물거래"
+]
+
+  },
+
+  "Rude Behavior": {
+   keywords: [
+  // Abusive / rude language
+  "바보","멍청이","개새끼","병신","닥쳐","입 닥쳐","그만해","조용히 해","꺼져"
+]
+
+  },
+
+  "Unbalanced Statement": {
+  keywords: [
+  // Profit / safety claims
+  "안전하게","수익","수익이 생길 수 있어요","수익을 얻으시는 있고","위험성이 없는",
+  "얻으실 수 있어요","최소 수익","계속 얻으실 수 있어요","계속 수익  얻으실 수 있어요",
+  "계속 수익 벌 수 있어요","벌 수 있어요","큰 수익","계속"
+]
+
+  },
+
+  "Ignores Clients Requests": {
+    keywords: [
+      
+    ]
+  },
+
+  "Couldn't Properly Answer the Client's Question": {
+    keywords: [
+      
+    ]
+  },
+
+  "Trading / Investment Advice": {
+    keywords: [
+      
+    ]
+  },
+
+  "Client is not satisfied with the way he was treated by the Company": {
+    keywords: [
+      
+    ]
+  },
+
+  "Missing Knowledge of the Market": {
+    keywords: [
+    
+    ]
+  },
+
+  "False Market Information": {
+    keywords: [
+      
+    ]
+  },
+
+  "Agent hides or doesn’t explain/provide the client all Trading Instruments": {
+    keywords: [
+      
+    ]
+  },
+
+  "Lack of Basic Trading Knowledge": {
+    keywords: [
+     
+    ]
+  },
+
+  "Failing to Explain Margin/Margin call": {
+    keywords: [
+      
+    ]
+  },
+
+  "No Reference to Source": {
+   keywords: [
+  // Market movement / price direction claims
+  "내려가고 있어요","내려갈 거예요","떨어지는 거예요","떨어질 거예요",
+  "오르는 거예요","올라가는 거예요","올라갈 거예요",
+  "가격이 내려가고 있어요","가격이 내려갈 거예요","가격이 떨어지는 거예요",
+  "가격이 떨어질 거예요","가격이 오르는 거예요","가격이 올라가는 거예요",
+  "가격이 올라갈 거예요","예상하는"
+]
+
+  },
+
+  "Advised the Client to Keep the Losing Trades Open": {
+    keywords: [
+      
+    ]
+  },
+
+  "Managing Client's Account": {
+    keywords: [
+     
+    ]
+  },
+
+  "Unauthorized Transaction": {
+    keywords: [
+      
+    ]
+  },
+
+  "Promised/Guaranteed Profit": {
+  keywords: [
+  // Expected / potential profit claims
+  "볼 수 있는 수익","예상하는 수익","가능 수익",
+  "볼 거예요","볼 수가 있어요","벌 거예요","벌 수가 있어요"
+]
+
+  },
+
+  "Uses Communication Methods not Pre-Approved by the Company": {
+    keywords: [
+    
+    ]
+  },
+
+  "Neglection of Withdrawal": {
+    keywords: [
+       "출금"
+    ]
+  },
+
+  "False Information about the Automatic Trading/System/Robot": {
+  keywords: [
+  // Automation / system claims
+  "알아서","프로그램만 시작","한번 시작 돌려주셔야 되고요",
+  "자동 시스템","자동 프로그램","알아서 하는 거예요"
+]
+
+  },
+
+  "Misleading the client to a Higher Leverage/Margin": {
+    keywords: [
+     
+    ]
+  },
+
+  "Inappropriate Placing AM'S interest above the company / client interest": {
+    keywords: [
+     
+    ]
+  },
+
+  "Professionalism": {
+    keywords: [
+      // positive/respectful markers – none explicit in riskyPhrases
+    ]
+  },
+
+  "Disobey the Company's Rules": {
+    keywords: [
+     
+    ]
+  },
+
+  "AM Hides Certain Service or Doesn't Explain": {
+    keywords: [
+      
+    ]
+  },
+  
+    "You can ignore this, but do so with caution!!": {
+    keywords: [
+      // Titles that imply unauthorized services/structure
+     
+    ]
+  },
+
+  "Failing to Honor Agreements": {
+    keywords: [
+      // none explicit in riskyPhrases, can be filled if transcripts show broken promises
+        
+    ]
+  }
+};
+
+
+        // Flatten all keywords into one array (for looping/searching)
+        const riskyPhrases = Object.values(categories).flatMap(cat => cat.keywords);
+
+        // Find category name for a given phrase
+       function getCategory(phrase) {
+  // Convert the phrase to lowercase for case-insensitive matching
+  const lowerPhrase = phrase.toLowerCase();
+  
+  for (const [category, data] of Object.entries(categories)) {
+    // Convert all keywords to lowercase for comparison
+    const lowerKeywords = data.keywords.map(keyword => keyword.toLowerCase());
+    
+    if (lowerKeywords.includes(lowerPhrase)) {
+      return category;
+    }
+  }
+  return null;
+}
+
+        // Return a CSS-safe class name from the category
+        function categoryClass(name) {
+          return "category-" + name.replace(/\s+/g, "-").toLowerCase();
+        }
+        
+        // Store uploaded files and their content
+        const uploadedFiles = [];
+        let currentFileIndex = 0;
+        const checkSound = document.getElementById('checkSound');
+        const completionMessage = document.getElementById('completionMessage');
+        
+        // Initialize file upload with order preservation
+        document.getElementById('fileUpload').addEventListener('change', async function(e) {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+            
+            // Show loading state
+            const uploadLabel = document.getElementById('fileUploadLabel');
+            const originalLabelContent = uploadLabel.innerHTML;
+            uploadLabel.innerHTML = `<i class="material-icons">hourglass_empty</i> Processing ${files.length} files...`;
+            uploadLabel.style.pointerEvents = 'none';
+            
+            try {
+                // Process files sequentially to maintain order
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    
+                    // Skip if file already exists
+                    if (uploadedFiles.some(f => f.name === file.name)) continue;
+                    
+                    // Update loading status
+                    uploadLabel.innerHTML = `<i class="material-icons">hourglass_empty</i> Processing ${i+1}/${files.length}: ${file.name}`;
+                    
+                    // Read file content with Promise
+                    const fileContent = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = event => resolve(event.target.result);
+                        reader.onerror = error => reject(error);
+                        reader.readAsText(file);
+                    });
+                    
+                    // Add to uploaded files array
+                    uploadedFiles.push({
+                        name: file.name,
+                        content: fileContent,
+                        risks: [],
+                        checkedRisks: []
+                    });
+                }
+                
+                // Update UI
+                updateFileList();
+                if (uploadedFiles.length > 0) {
+                    loadFile(0);
+                }
+                
+            } catch (error) {
+                console.error('Error reading files:', error);
+                alert('Error reading one or more files. Please try again.');
+            } finally {
+                // Reset upload label and input
+                uploadLabel.innerHTML = originalLabelContent;
+                uploadLabel.style.pointerEvents = '';
+                document.getElementById('fileUpload').value = ''; // Reset input to allow adding more files
+            }
+        });
+
+        // Drag and drop functionality
+        const fileUploadLabel = document.getElementById('fileUploadLabel');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileUploadLabel.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileUploadLabel.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileUploadLabel.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            fileUploadLabel.classList.add('drag-over');
+        }
+        
+        function unhighlight() {
+            fileUploadLabel.classList.remove('drag-over');
+        }
+        
+        fileUploadLabel.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = Array.from(dt.files);
+            
+            // Create a new DataTransfer object to maintain file order
+            const dataTransfer = new DataTransfer();
+            files.forEach(file => dataTransfer.items.add(file));
+            
+            // Assign to file input
+            const fileInput = document.getElementById('fileUpload');
+            fileInput.files = dataTransfer.files;
+            
+            // Trigger change event
+            const event = new Event('change');
+            fileInput.dispatchEvent(event);
+        }
+        
+        function updateFileList() {
+            const fileItems = document.getElementById('fileItems');
+            fileItems.innerHTML = '';
+            
+            if (uploadedFiles.length === 0) {
+                document.getElementById('fileList').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('fileList').style.display = 'block';
+            
+            uploadedFiles.forEach((file, index) => {
+                const fileElement = document.createElement('div');
+                fileElement.className = `file-item ${index === currentFileIndex ? 'active' : ''}`;
+                fileElement.innerHTML = `
+                    <span style="min-width: 25px; color: var(--dark-gray);">${index + 1}.</span>
+                    <i class="material-icons">description</i>
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-remove" onclick="removeFile(${index}, event)">
+                        <i class="material-icons">close</i>
+                    </div>
+                `;
+                fileElement.onclick = () => loadFile(index);
+                fileItems.appendChild(fileElement);
+            });
+        }
+        
+        function loadFile(index) {
+            if (index < 0 || index >= uploadedFiles.length) return;
+            
+            currentFileIndex = index;
+            document.getElementById('transcriptInput').value = uploadedFiles[index].content;
+            updateFileList();
+            
+            // Load checked state from local storage
+            loadCheckedState();
+            
+            // Auto-analyze if risks were previously found
+            if (uploadedFiles[index].risks.length > 0) {
+                showResultsForFile(index);
+            } else {
+                document.getElementById('resultsContainer').style.display = 'none';
+            }
+        }
+        
+        function loadCheckedState() {
+            if (uploadedFiles.length > 0) {
+                const fileData = uploadedFiles[currentFileIndex];
+                const savedData = localStorage.getItem(`checkedRisks_${fileData.name}`);
+                if (savedData) {
+                    fileData.checkedRisks = JSON.parse(savedData);
+                }
+            }
+        }
+        
+        function saveCheckedState() {
+            if (uploadedFiles.length > 0) {
+                const fileData = uploadedFiles[currentFileIndex];
+                localStorage.setItem(`checkedRisks_${fileData.name}`, JSON.stringify(fileData.checkedRisks));
+            }
+        }
+        
+        function removeFile(index, event) {
+            event.stopPropagation();
+            // Remove saved state from local storage
+            if (uploadedFiles[index]) {
+                localStorage.removeItem(`checkedRisks_${uploadedFiles[index].name}`);
+            }
+            uploadedFiles.splice(index, 1);
+            
+            if (currentFileIndex >= index) {
+                currentFileIndex = Math.max(0, currentFileIndex - 1);
+            }
+            
+            if (uploadedFiles.length > 0) {
+                loadFile(currentFileIndex);
+            } else {
+                document.getElementById('transcriptInput').value = '';
+                document.getElementById('fileList').style.display = 'none';
+                document.getElementById('resultsContainer').style.display = 'none';
+            }
+            
+            updateFileList();
+        }
+        
+        function analyzeTranscript() {
+            const btn = document.querySelector('.btn');
+            btn.classList.add('analyzing');
+            
+            const transcript = document.getElementById('transcriptInput').value.trim();
+            const resultsContainer = document.getElementById('resultsContainer');
+            const riskList = document.getElementById('riskList');
+            
+            if (!transcript) {
+                alert('Please paste or upload a transcript first');
+                btn.classList.remove('analyzing');
+                return;
+            }
+            
+            // Reset UI
+            riskList.innerHTML = '';
+            resultsContainer.style.display = 'none';
+            
+            // Case-insensitive regex search
+            const riskyRegex = new RegExp(riskyPhrases.join("|"), "gi");
+            const matches = [...transcript.matchAll(riskyRegex)];
+            
+            // Find timestamps if they exist
+            const timeRegex = /\[(\d{1,2}:\d{2}:\d{2})\s*-\s*\d{1,2}:\d{2}:\d{2}\]/g;
+            const timeMatches = [...transcript.matchAll(timeRegex)];
+            const timePositions = timeMatches.map(match => ({
+                time: match[1],
+                index: match.index
+            }));
+            
+            // Process matches
+           if (matches.length === 0) {
+    riskList.innerHTML = `
+        <div class="no-risks">
+            <i class="material-icons">check_circle</i>
+            <div>No risky phrases detected in this transcript</div>
+        </div>
+        <div class="expand-transcript-container" style="text-align: center; margin-top: 20px;">
+            <button class="btn" onclick="showTranscript()" style="background-color: var(--dark-gray);">
+                <i class="material-icons">visibility</i> Show Transcript
+            </button>
+        </div>
+    `;
+    document.getElementById('totalRisks').textContent = '0';
+    document.getElementById('uniqueRisks').textContent = '0';
+    document.getElementById('firstRiskTime').textContent = '--:--:--';
+    document.getElementById('lastRiskTime').textContent = '--:--:--';
+    resultsContainer.style.display = 'block';
+    
+    // Store empty risks for this file
+    if (uploadedFiles.length > 0) {
+        uploadedFiles[currentFileIndex].risks = [];
+        uploadedFiles[currentFileIndex].checkedRisks = [];
+        saveCheckedState();
+    }
+    
+    btn.classList.remove('analyzing');
+    return;
+}
+            
+            // Process and deduplicate matches
+            const uniquePhrases = new Set();
+            const riskItems = [];
+            let firstTime = null;
+            let lastTime = null;
+            
+            matches.forEach((match, matchIndex) => {
+                const phrase = match[0].toLowerCase();
+                const phraseIndex = match.index;
+                let foundTime = null;
+                
+                // Find the most recent timestamp before this phrase
+                for (let i = timePositions.length - 1; i >= 0; i--) {
+                    if (timePositions[i].index < phraseIndex) {
+                        foundTime = timePositions[i].time;
+                        if (!firstTime) firstTime = foundTime;
+                        lastTime = foundTime;
+                        break;
+                    }
+                }
+                
+                uniquePhrases.add(phrase);
+                riskItems.push({
+                    phrase: match[0], // Original case
+                    time: foundTime,
+                    index: phraseIndex,
+                    matchIndex: matchIndex
+                });
+            });
+            
+            // Sort by position in transcript
+            riskItems.sort((a, b) => a.index - b.index);
+            
+            // Store risks for this file
+            if (uploadedFiles.length > 0) {
+                uploadedFiles[currentFileIndex].risks = riskItems;
+                // Initialize checkedRisks array if it doesn't exist
+                if (!uploadedFiles[currentFileIndex].checkedRisks) {
+                    uploadedFiles[currentFileIndex].checkedRisks = [];
+                }
+                saveCheckedState();
+            }
+            
+            // Generate risk list HTML
+            riskItems.forEach((item, itemIndex) => {
+                const riskElement = document.createElement('div');
+                riskElement.className = 'risk-item';
+                riskElement.style.setProperty('--i', itemIndex);
+                
+                if (uploadedFiles.length > 0 && uploadedFiles[currentFileIndex].checkedRisks.includes(itemIndex)) {
+                    riskElement.classList.add('checked');
+                }
+                
+                const category = getCategory(item.phrase.toLowerCase());
+                const categoryClassname = category ? categoryClass(category) : '';
+                
+               riskElement.innerHTML = `
+    <div class="risk-icon">
+        <i class="material-icons">warning</i>
+        <i class="material-icons checked-icon">check_circle</i>
+    </div>
+    <div class="risk-content">
+        <div class="risk-phrase ${categoryClassname}">${item.phrase}</div>
+        <div class="risk-context">
+${category ? `<span class="risk-category" data-category="${category}">${category}</span>` : ''}            Found in transcript
+            ${item.time ? `<span class="risk-time">${item.time}</span>` : ''}
+        </div>
+    </div>
+    <div class="risk-progress"></div>
+`;
+                
+                riskElement.onclick = () => {
+                    highlightRiskInText(item.matchIndex);
+                    // Toggle checked state
+                    riskElement.classList.toggle('checked');
+                    // Play sound
+                    checkSound.currentTime = 0;
+                    checkSound.play();
+                    // Update the checkedRisks array for this file
+                    if (uploadedFiles.length > 0) {
+                        const checkedIndex = uploadedFiles[currentFileIndex].checkedRisks.indexOf(itemIndex);
+                        if (checkedIndex === -1) {
+                            uploadedFiles[currentFileIndex].checkedRisks.push(itemIndex);
+                        } else {
+                            uploadedFiles[currentFileIndex].checkedRisks.splice(checkedIndex, 1);
+                        }
+                        saveCheckedState();
+                        checkAllRisksCompleted();
+                    }
+                };
+                
+                riskList.appendChild(riskElement);
+            });
+            
+            // Update summary stats
+            document.getElementById('totalRisks').textContent = matches.length;
+            document.getElementById('uniqueRisks').textContent = uniquePhrases.size;
+            document.getElementById('firstRiskTime').textContent = firstTime || '--:--:--';
+            document.getElementById('lastRiskTime').textContent = lastTime || '--:--:--';
+            
+            // Highlight risks in original text
+            highlightRisksInTranscript(riskItems);
+            
+            // Show results
+            resultsContainer.style.display = 'block';
+            btn.classList.remove('analyzing');
+        }
+        
+        function checkAllRisksCompleted() {
+            const totalRisks = document.querySelectorAll('.risk-item').length;
+            const checkedRisks = document.querySelectorAll('.risk-item.checked').length;
+            
+            if (totalRisks > 0 && totalRisks === checkedRisks) {
+                createConfetti();
+                showCompletionMessage();
+            }
+        }
+        
+        function createConfetti() {
+            const container = document.querySelector('.risk-list');
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.background = `hsl(${Math.random() * 60 + 150}, 80%, 60%)`;
+                confetti.style.animation = `confettiFall ${Math.random() * 3 + 2}s linear forwards`;
+                confetti.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(confetti);
+                
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+        }
+        
+        function showCompletionMessage() {
+            completionMessage.style.display = 'block';
+            setTimeout(() => {
+                completionMessage.style.display = 'none';
+            }, 3000);
+        }
+        
+        function showResultsForFile(fileIndex) {
+            const riskItems = uploadedFiles[fileIndex].risks;
+            const riskList = document.getElementById('riskList');
+            
+            riskList.innerHTML = '';
+            
+            if (riskItems.length === 0) {
+                riskList.innerHTML = `
+                    <div class="no-risks">
+                        <i class="material-icons">check_circle</i>
+                        <div>No risky phrases detected in this transcript</div>
+                    </div>
+                `;
+            } else {
+                riskItems.forEach((item, itemIndex) => {
+                    const riskElement = document.createElement('div');
+                    riskElement.className = 'risk-item';
+                    riskElement.style.setProperty('--i', itemIndex);
+                    
+                    if (uploadedFiles[fileIndex].checkedRisks.includes(itemIndex)) {
+                        riskElement.classList.add('checked');
+                    }
+                    
+                    const category = getCategory(item.phrase.toLowerCase());
+                    const categoryClassname = category ? categoryClass(category) : '';
+                    
+                    riskElement.innerHTML = `
+                        <div class="risk-icon">
+                            <i class="material-icons">warning</i>
+                            <i class="material-icons checked-icon">check_circle</i>
+                        </div>
+                        <div class="risk-content">
+                            <div class="risk-phrase ${categoryClassname}">${item.phrase}</div>
+                            <div class="risk-context">
+                                ${category ? `<span class="risk-category" data-category="${category}">${category}</span>` : ''}
+                                Found in transcript
+                                ${item.time ? `<span class="risk-time">${item.time}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="risk-progress"></div>
+                    `;
+                    
+                    riskElement.onclick = () => {
+                        highlightRiskInText(item.matchIndex);
+                        // Toggle checked state
+                        riskElement.classList.toggle('checked');
+                        // Play sound
+                        checkSound.currentTime = 0;
+                        checkSound.play();
+                        // Update the checkedRisks array for this file
+                        const checkedIndex = uploadedFiles[fileIndex].checkedRisks.indexOf(itemIndex);
+                        if (checkedIndex === -1) {
+                            uploadedFiles[fileIndex].checkedRisks.push(itemIndex);
+                        } else {
+                            uploadedFiles[fileIndex].checkedRisks.splice(checkedIndex, 1);
+                        }
+                        saveCheckedState();
+                        checkAllRisksCompleted();
+                    };
+                    
+                    riskList.appendChild(riskElement);
+                });
+            }
+            
+            // Update summary stats
+            document.getElementById('totalRisks').textContent = riskItems.length;
+            document.getElementById('uniqueRisks').textContent = new Set(riskItems.map(item => item.phrase.toLowerCase())).size;
+            document.getElementById('firstRiskTime').textContent = riskItems[0]?.time || '--:--:--';
+            document.getElementById('lastRiskTime').textContent = riskItems[riskItems.length - 1]?.time || '--:--:--';
+            
+            // Highlight risks in original text
+            highlightRisksInTranscript(riskItems);
+            
+            // Show results
+            document.getElementById('resultsContainer').style.display = 'block';
+        }
+        
+       function highlightRisksInTranscript(riskItems) {
+    const textarea = document.getElementById('transcriptInput');
+    const text = textarea.value;
+    
+    // Remove any existing highlight container
+    const existingHighlight = document.getElementById('highlightContainer');
+    if (existingHighlight) {
+        existingHighlight.remove();
+    }
+    
+    // If no risks and no text, return early
+    if ((!riskItems || riskItems.length === 0) && !text) return;
+    
+    // Create a document fragment to work with
+    const fragment = document.createElement('div');
+    
+    // If we have risks, process them
+    if (riskItems && riskItems.length > 0) {
+        const regex = new RegExp(riskyPhrases.join("|"), "gi");
+        let lastIndex = 0;
+        const matches = [...text.matchAll(regex)];
+        
+        matches.forEach((match, matchIndex) => {
+            // Add text before match
+            fragment.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+            
+            // Add highlighted match
+            const highlight = document.createElement('span');
+            highlight.className = 'highlight';
+            highlight.textContent = match[0];
+            highlight.onclick = () => {
+                // Remove active class from all highlights
+                document.querySelectorAll('.highlight').forEach(el => {
+                    el.classList.remove('active');
+                });
+                // Add active class to clicked highlight
+                highlight.classList.add('active');
+                
+                // Find corresponding risk item and scroll to it
+                const riskItem = document.querySelectorAll('.risk-item')[matchIndex];
+                if (riskItem) {
+                    riskItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    // Flash the risk item
+                    riskItem.style.backgroundColor = 'rgba(0, 173, 181, 0.2)';
+                    setTimeout(() => {
+                        riskItem.style.backgroundColor = '';
+                    }, 2000);
+                }
+            };
+            fragment.appendChild(highlight);
+            
+            lastIndex = match.index + match[0].length;
+        });
+        
+        // Add remaining text
+        fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+    } else {
+        // Just show the plain text if no risks
+        fragment.appendChild(document.createTextNode(text));
+    }
+    
+    // Only update if we have text
+    if (text) {
+        textarea.style.display = 'none';
+        
+        const highlightContainer = document.createElement('div');
+        highlightContainer.id = 'highlightContainer';
+        highlightContainer.className = 'container';
+        highlightContainer.style.marginTop = '-20px';
+        highlightContainer.style.padding = '15px';
+        highlightContainer.style.backgroundColor = 'white';
+        highlightContainer.style.borderRadius = '4px';
+        highlightContainer.style.border = '1px solid #ddd';
+        
+        // Only show the helper text if we have risks
+        if (riskItems && riskItems.length > 0) {
+            highlightContainer.innerHTML = `
+                <div style="font-size: 14px; color: var(--dark-gray); margin-bottom: 10px;">
+                    <i class="material-icons" style="vertical-align: middle; color: var(--warning);">highlight</i>
+                    Click highlighted phrases to jump to their risk entries
+                </div>
+                <div style="white-space: pre-wrap;"></div>
+            `;
+        } else {
+            highlightContainer.innerHTML = `
+                <div style="white-space: pre-wrap;"></div>
+            `;
+        }
+        
+        highlightContainer.querySelector('div:last-child').appendChild(fragment);
+        textarea.parentNode.insertBefore(highlightContainer, textarea.nextSibling);
+    } else {
+        textarea.style.display = 'block';
+    }
+}
+        
+        function highlightRiskInText(matchIndex) {
+            // Remove active class from all highlights
+            document.querySelectorAll('.highlight').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Add active class to corresponding highlight
+            const highlights = document.querySelectorAll('.highlight');
+            if (highlights.length > matchIndex) {
+                highlights[matchIndex].classList.add('active');
+                highlights[matchIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        
+        async function copyResults() {
+    try {
+        const hasMultipleFiles = Array.isArray(uploadedFiles) && uploadedFiles.length > 0;
+        let allRiskItems = [];
+
+        if (hasMultipleFiles) {
+            uploadedFiles.forEach(file => {
+                allRiskItems = allRiskItems.concat(file.risks || []);
+            });
+        } else {
+            const riskElements = document.querySelectorAll('.risk-item');
+            riskElements.forEach(item => {
+                const phraseEl = item.querySelector('.risk-phrase');
+                const timeEl = item.querySelector('.risk-time');
+                if (phraseEl) {
+                    allRiskItems.push({
+                        phrase: phraseEl.textContent.trim(),
+                        time: (timeEl?.textContent || 'no timestamp').trim()
+                    });
+                }
+            });
+        }
+
+        if (allRiskItems.length === 0) {
+            alert('No risks found to copy');
+            return;
+        }
+
+        // Build the text exactly like before
+        const textToCopy = allRiskItems
+            .map(item => `⚠️ "${item.phrase}" at [${item.time}]`)
+            .join('\n');
+
+        // ✅ Debug log to see what phrases we actually have
+        console.log("All risk phrases:", allRiskItems.map(i => i.phrase));
+
+        // Keywords to check
+        const keywords = [
+            "senior account manager",
+            "personal senior account manager",
+            "financial advisor",
+            "financial adviser",
+            "portfolio manager",
+            "senior expert",
+            "senior manager"
+        ];
+
+        // Compare only against risky phrases (exact matches, case-insensitive)
+        const phrases = allRiskItems.map(item => item.phrase.toLowerCase());
+        const found = phrases.some(p =>
+            keywords.some(k => p === k.toLowerCase())
+        );
+
+        if (!found) {
+            showSAMPopup();
+        }
+
+        // Try to copy
+        let copied = false;
+        if (navigator.clipboard && window.isSecureContext) {
+            try {
+                await navigator.clipboard.writeText(textToCopy);
+                copied = true;
+            } catch (err) {
+                console.warn("navigator.clipboard failed:", err);
+            }
+        }
+        if (!copied) {
+            // Fallback for environments that block navigator.clipboard
+            const ta = document.createElement('textarea');
+            ta.value = textToCopy;
+            ta.setAttribute('readonly', '');
+            ta.style.position = 'fixed';
+            ta.style.top = '-1000px';
+            document.body.appendChild(ta);
+            ta.select();
+            try { copied = document.execCommand('copy'); } catch (_) {}
+            document.body.removeChild(ta);
+        }
+
+        // Show confirmation on button
+        const copyBtn = document.querySelector('.copy-btn');
+        if (copied && copyBtn) {
+            const original = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<i class="material-icons">check</i> Copied!';
+            setTimeout(() => copyBtn.innerHTML = original, 30000); // 30s revert
+        }
+
+    } catch (err) {
+        console.error("copyResults error:", err);
+        alert("Copy failed due to an error. Check the console for details.");
+    }
+}
+
+// Popup helpers
+function showSAMPopup() {
+    const popup = document.getElementById('missingSAMPopup');
+    popup.style.display = 'block';
+    setTimeout(() => { hideSAMPopup(); }, 80000);
+}
+function hideSAMPopup() {
+    document.getElementById('missingSAMPopup').style.display = 'none';
+}
+
+
+        // Enhanced double click to scroll to top/bottom feature
+        document.addEventListener('dblclick', function(e) {
+            // List of elements to ignore
+            const ignoreElements = ['BUTTON', 'A', 'INPUT', 'TEXTAREA', 'LABEL', 'I', 'SPAN', 'DIV'];
+            
+            // Check if clicked element or any of its parents should be ignored
+            let shouldIgnore = false;
+            let target = e.target;
+            
+            while (target && target !== document.body) {
+                if (ignoreElements.includes(target.tagName) || 
+                    target.classList.contains('risk-item') || 
+                    target.classList.contains('file-item')) {
+                    shouldIgnore = true;
+                    break;
+                }
+                target = target.parentElement;
+            }
+            
+            if (shouldIgnore) return;
+
+            // Check if click is outside main containers or on body background
+            const mainContainers = document.querySelectorAll('.container');
+            const clickedOnBackground = e.target === document.body || 
+                                      e.target === document.documentElement ||
+                                      !Array.from(mainContainers).some(container => container.contains(e.target));
+
+            if (clickedOnBackground) {
+                const scrollPosition = window.scrollY;
+                const windowHeight = window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight;
+                const scrollThreshold = 150; // Increased threshold
+
+                // If near bottom (within threshold), scroll to top
+                if (scrollPosition + windowHeight >= documentHeight - scrollThreshold) {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                } 
+                // If near top (within threshold), scroll to bottom
+                else if (scrollPosition <= scrollThreshold) {
+                    window.scrollTo({
+                        top: documentHeight,
+                        behavior: 'smooth'
+                    });
+                }
+                // In middle - scroll to whichever end is closer
+                else {
+                    const distanceToTop = scrollPosition;
+                    const distanceToBottom = documentHeight - (scrollPosition + windowHeight);
+                    
+                    window.scrollTo({
+                        top: distanceToTop < distanceToBottom ? 0 : documentHeight,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        });
+        // Toggle dark mode for transcript only
+// Dark mode toggle with localStorage
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+
+// Check for saved theme preference
+const savedTheme = localStorage.getItem('darkTranscript');
+if (savedTheme === 'true') {
+    document.body.classList.add('dark-transcript');
+    themeToggle.checked = true;
+    themeIcon.textContent = 'dark_mode';
+}
+
+themeToggle.addEventListener('change', function() {
+    if (this.checked) {
+        document.body.classList.add('dark-transcript');
+        themeIcon.textContent = 'dark_mode';
+        localStorage.setItem('darkTranscript', 'true');
+    } else {
+        document.body.classList.remove('dark-transcript');
+        themeIcon.textContent = 'light_mode';
+        localStorage.setItem('darkTranscript', 'false');
+    }
+});
+function switchLanguage(lang) {
+    if (lang === 'en') {
+        window.location.href = 'https://qcanalayzer007.github.io/QC-ENG-VER/';
+    } else if (lang === 'jp') {
+        window.location.href = 'https://qcanalayzer007.github.io/QC-JAPANESE-VER./';
+    } else if (lang === 'kr') {
+        window.location.href = 'https://qcanalayzer007.github.io/QC-KOREAN-VER/';
+    }
+}
+function showTranscript() {
+    const transcript = document.getElementById('transcriptInput').value.trim();
+    if (!transcript) return;
+    
+    // Create a temporary array to trigger highlighting
+    const tempRisks = [
+        {
+            phrase: "",
+            time: null,
+            index: 0,
+            matchIndex: 0
+        }
+    ];
+    
+    highlightRisksInTranscript(tempRisks);
+    
+    // Scroll to the transcript
+    const highlightContainer = document.getElementById('highlightContainer');
+    if (highlightContainer) {
+        highlightContainer.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Remove the button after showing
+    const expandContainer = document.querySelector('.expand-transcript-container');
+    if (expandContainer) {
+        expandContainer.remove();
+    }
+}
+function toggleInputContainer() {
+        const container = document.getElementById('userInputContainer');
+        container.style.display = container.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Enhanced submit function
+  const scriptUrl = 'https://script.google.com/macros/s/AKfycbwtqGaGcoxjkx64KObNfLQuYn11gBc79hx6ptxX8ppaHdL_es5_9OE1XkbEU4RVB2KGGw/exec';
+
+    function submitKeyword() {
+        const username = document.getElementById('usernameInput').value.trim();
+        const keyword = document.getElementById('newKeywordInput').value.trim();
+        const messageEl = document.getElementById('submitMessage');
+        
+        // Clear previous messages
+        messageEl.style.display = 'none';
+        
+        // Validation
+        if (!username) {
+            showMessage('Please enter your name', 'error');
+            document.getElementById('usernameInput').focus();
+            return;
+        }
+        
+        if (!keyword) {
+            showMessage('Please enter a keyword to suggest', 'error');
+            document.getElementById('newKeywordInput').focus();
+            return;
+        }
+        
+        if (keyword.length < 3) {
+            showMessage('Keyword must be at least 3 characters', 'error');
+            return;
+        }
+        
+        // Case-insensitive check
+        const lowerCaseKeywords = riskyPhrases.map(phrase => phrase.toLowerCase());
+        if (lowerCaseKeywords.includes(keyword.toLowerCase())) {
+            showMessage('This keyword already exists', 'warning');
+            return;
+        }
+        
+        // Prepare data
+        const data = {
+            username: username,
+            keyword: keyword,
+            timestamp: new Date().toISOString()
+        };
+        
+        // Show loading state
+        showMessage('Submitting...', 'info');
+        
+        // Create a hidden iframe for fallback
+        const iframe = document.createElement('iframe');
+        iframe.name = 'hiddenFrame';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+        
+        // 1. First try with fetch and no-cors mode (as you confirmed this worked before)
+        fetch(scriptUrl, {
+            method: 'POST',
+            mode: 'no-cors', // This is key for firewall compatibility
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(() => {
+            // With no-cors we can't read the response, so we'll assume success
+            handleSuccess(keyword);
+            
+            // Fallback verification (optional)
+            setTimeout(() => verifySubmission(data), 3000);
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            // 2. Fallback to form submission
+            submitViaForm(data, keyword);
+        })
+        .finally(() => {
+            setTimeout(() => iframe.remove(), 5000);
+        });
+    }
+
+    // Optional verification function
+    function verifySubmission(data) {
+        // This uses a separate GET endpoint to verify the submission
+        // You would need to implement doGet() in your Apps Script
+        fetch(`${scriptUrl}?action=verify&username=${encodeURIComponent(data.username)}&keyword=${encodeURIComponent(data.keyword)}`)
+        .then(response => response.json())
+        .then(result => {
+            if (!result.found) {
+                console.warn('Submission verification failed');
+                // You could show a warning to the user here
+            }
+        })
+        .catch(error => console.error('Verification failed:', error));
+    }
+
+    function submitViaForm(data, keyword) {
+        const form = document.createElement('form');
+        form.style.display = 'none';
+        form.method = 'POST';
+        form.action = scriptUrl;
+        form.target = 'hiddenFrame';
+        
+        // Add all data as hidden inputs
+        const jsonInput = document.createElement('input');
+        jsonInput.type = 'hidden';
+        jsonInput.name = 'postData';
+        jsonInput.value = JSON.stringify({
+            contents: JSON.stringify(data)
+        });
+        form.appendChild(jsonInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+        
+        // Assume success since we can't get response from form submission
+        handleSuccess(keyword);
+        setTimeout(() => form.remove(), 2000);
+    }
+
+    function handleSuccess(keyword) {
+        showMessage('Keyword submitted successfully!', 'success');
+        document.getElementById('newKeywordInput').value = '';
+        riskyPhrases.push(keyword);
+    }
+
+    function showMessage(text, type) {
+        const messageEl = document.getElementById('submitMessage');
+        messageEl.textContent = text;
+        messageEl.style.display = 'block';
+        messageEl.style.color = 
+            type === 'error' ? 'var(--danger)' :
+            type === 'success' ? 'var(--success)' :
+            type === 'warning' ? 'var(--warning)' : 'var(--dark-gray)';
+        
+        if (type !== 'error') {
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 3000);
+        }
+    }
+    </script>
+<div id="missingSAMPopup" class="professional-popup">
+  <div class="popup-header">
+    <div class="header-icon">
+      <i class="material-icons">warning</i>
+    </div>
+    <h3>Compliance Alert: Missing Senior Account Manager Reference</h3>
+    <span class="close-btn" onclick="hideSAMPopup()">
+      <i class="material-icons">close</i>
+    </span>
+  </div>
+  
+  <div class="popup-content">
+    <div class="main-message">
+      <p>Analysis of all transcripts indicates the agent did not reference a <strong>Senior Account Manager</strong> or equivalent relationship management service during the conversation.</p>
+    </div>
+    
+    <div class="risk-section">
+      <div class="section-label">Identified Risk Category:</div>
+      <div class="risk-category-highlight">
+        <span class="risk-category" data-category="AM Hides Certain Service or Doesn't Explain">AM Hides Certain Service or Doesn't Explain</span>
+      </div>
+    </div>
+    
+    <div class="notice-section">
+      <div class="notice-header">
+        <i class="material-icons">info</i>
+        <span>Important Note</span>
+      </div>
+      <div class="notice-content">
+        This alert does not apply to retention calls. Please verify the call context before flagging this issue.
+      </div>
+    </div>
+  </div>
+  
+  <div class="popup-footer">
+    <button class="acknowledge-btn primary" onclick="hideSAMPopup()">
+      <i class="material-icons">check_circle</i>
+      Acknowledge
+    </button>
+  </div>
+</div>
+<script>
+// Override the showSAMPopup function to prevent the popup from appearing
+function showSAMPopup() {
+    console.log("SAM popup functionality has been disabled");
+    // Don't show the popup - just log a message instead
+}
+
+// Also override the hide function for completeness
+function hideSAMPopup() {
+    console.log("SAM popup hide function called (popup was disabled)");
+}
+</script>
+</body>
+
+</html>
+
+
+
+
+
